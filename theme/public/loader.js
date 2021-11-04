@@ -98,6 +98,8 @@ class Loader {
 
     slides.init();
 
+    document.querySelector('#gallery').style.display = 'none';
+
     window.slides = slides;
 
     slides.listen('beforeChange', () => {
@@ -113,6 +115,8 @@ class Loader {
     });
 
     slides.listen('close', () => {
+      document.querySelector('#gallery').style.display = '';
+
       // Stop current video if any
       const indexToFind = slides.getCurrentIndex();
       document.querySelector(`#video-slide-${indexToFind}`)?.pause();
