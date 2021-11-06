@@ -3,11 +3,10 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#000000"/>
   <title>{{gallery.title}} - {{album.title}}</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.16.0/video-js.min.css" />
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/lightgallery/2.3.0/css/lightgallery-bundle.min.css" />
   <link rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/justifiedGallery/3.8.1/css/justifiedGallery.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe.min.css" />
@@ -29,14 +28,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.3/photoswipe-ui-default.min.js"></script>
 
   <script src="public/loader.js"></script>
+
+  <style>
+    body {
+      touch-action: pan-x pan-y;
+    }
+  </style>
 </head>
 
-<body>
-
-  <div id="gallery">
-    {{> content}}
-    {{> video-loader}}
-  </div>
+<body style="width: 100%; height: 100%;">
 
   <!-- Root element of PhotoSwipe. Must have class pswp. -->
   <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
@@ -109,17 +109,12 @@
 
   </div>
 
+  <div id="gallery">
+    {{> content}}
+    {{> video-loader}}
+  </div>
+
   <script>
-    /**
-      - justified gallery
-      - photoswipe
-      - infinite
-
-
-      lightgallery zoom sucks on mobile.
-      it sucks in general on mobile.
-    **/
-
     const content = [
       {{#each album.files~}}
         {

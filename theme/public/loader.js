@@ -6,7 +6,11 @@ class Loader {
 
   currGalleryIndex = 0;
 
+  initHeight;
+
   init() {
+    this.initHeight = window.innerHeight;
+
     const initialContentToLoad = [];
 
     // Calculate how many images to show on page load
@@ -59,10 +63,32 @@ class Loader {
     anchor.setAttribute('onclick', 'return false;');
     anchor.append(image);
 
+    if (item.isVideo) {
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: absolute;
+        z-index: 99;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+      `;
+      overlay.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+      anchor.append(overlay);
+    }
+
     document.querySelector('#media').append(anchor);
   }
 
   openSlides(at) {
+    document.body.style.position = 'fixed';
+    document.body.style.height = `${this.initHeight}px`;
+    document.querySelector('.pswp').style.height = `${this.initHeight}px`;
+
+    this.disableInfiniteScroll();
+
     const pswpElement = document.querySelectorAll('.pswp')[0];
 
     const items = this.media.map((item, i) => {
@@ -85,25 +111,19 @@ class Loader {
       }
     });
 
-
-    // Initializes and opens PhotoSwipe
     const slides = new PhotoSwipe(pswpElement, PhotoSwipeUI_Default, items, {
       allowPanToNext: false,
       closeOnVerticalDrag: false,
       history: false,
       index: at ?? 0, // start at first slide
       shareButtons: [],
-      tapToClose: true,
     });
 
     slides.init();
 
-    document.querySelector('#gallery').style.display = 'none';
-
     window.slides = slides;
 
     slides.listen('beforeChange', () => {
-      console.log(slides.currItem);
       if (slides.getCurrentIndex() + this.INFINITE_SCROLL_IMAGES_TO_LOAD >= this.currGalleryIndex) {
         this.loadMoreImagesToGallery();
       }
@@ -115,7 +135,9 @@ class Loader {
     });
 
     slides.listen('close', () => {
-      document.querySelector('#gallery').style.display = '';
+      document.body.style.height = '';
+      document.body.style.position = 'initial';
+      this.handleInfiniteScroll();
 
       // Stop current video if any
       const indexToFind = slides.getCurrentIndex();
@@ -140,11 +162,18 @@ class Loader {
   }
 
   handleInfiniteScroll() {
-    window.onscroll = () => {
-      if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
-        this.loadMoreImagesToGallery();
-      }
-    };
+    this.infiniteScrollBound = this.infiniteScroll.bind(this);
+    window.addEventListener('scroll', this.infiniteScrollBound);
+  }
+
+  disableInfiniteScroll() {
+    window.removeEventListener('scroll', this.infiniteScrollBound);
+  }
+
+  infiniteScroll() {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) {
+      this.loadMoreImagesToGallery();
+    }
   }
 
   loadMoreImagesToGallery() {
